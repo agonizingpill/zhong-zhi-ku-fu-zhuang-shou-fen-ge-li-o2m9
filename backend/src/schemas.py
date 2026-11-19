@@ -53,6 +53,14 @@ class HarvestInput(BaseModel):
     code:str=Field(min_length=3,max_length=60)
     seeds:int=Field(ge=1,le=1000000)
     moisture:float=Field(ge=0,le=40,allow_inf_nan=False)
+class StoreInput(BaseModel):
+    reason:str=Field(default='',max_length=300)
+    @model_validator(mode='after')
+    def clean(self):
+        self.reason=self.reason.strip()
+        return self
+class ExclusionInput(BaseModel):
+    reason:str=Field(min_length=5,max_length=300)
 class DistributionInput(BaseModel):
     lot_id:int
     code:str=Field(min_length=3,max_length=60)

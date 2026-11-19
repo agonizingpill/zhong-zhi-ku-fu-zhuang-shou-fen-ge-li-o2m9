@@ -82,6 +82,16 @@ class Harvest(Base):
     state:Mapped[str]=mapped_column(String(20),default='drying')
     offspring_lot_id:Mapped[int|None]=mapped_column(ForeignKey('lots.id'),nullable=True)
     lineage:Mapped[dict|None]=mapped_column(JSON,nullable=True)
+    excluded:Mapped[bool]=mapped_column(default=False)
+    yield_check:Mapped[dict|None]=mapped_column(JSON,nullable=True)
+class HarvestExclusion(Base):
+    __tablename__='harvest_exclusions'
+    id:Mapped[int]=mapped_column(primary_key=True)
+    harvest_id:Mapped[int]=mapped_column(ForeignKey('harvests.id'))
+    reason:Mapped[str]=mapped_column(String(300))
+    actor:Mapped[str]=mapped_column(String(100))
+    affected_harvest_ids:Mapped[list]=mapped_column(JSON)
+    check_snapshot:Mapped[dict]=mapped_column(JSON)
 class Distribution(Base):
     __tablename__='distributions'
     id:Mapped[int]=mapped_column(primary_key=True)

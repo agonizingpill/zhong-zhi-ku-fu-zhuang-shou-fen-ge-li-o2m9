@@ -29,3 +29,5 @@ target/
 *.o
 *.obj
 .DS_Store
+# 离线验证脚手架（标准库桩，不混入源码）
+.verify/

@@ -31,7 +31,7 @@ def login(d:Login,s=Depends(session)):
 def me(u=Depends(current)):return {'email':u.email,'role':u.role}
 @app.get('/archive')
 def archive(s=Depends(session),u=Depends(current)):
-    return {cls.__tablename__:[pack(x)for x in s.scalars(select(cls).order_by(cls.id))]for cls in (Accession,Lot,GerminationTest,Regeneration,Plot,Flowering,Pollination,Harvest,Distribution)}
+    return {cls.__tablename__:[pack(x)for x in s.scalars(select(cls).order_by(cls.id))]for cls in (Accession,Lot,GerminationTest,Regeneration,Plot,Flowering,Pollination,Harvest,HarvestExclusion,Distribution)}
 @app.get('/audits')
 def audits(s=Depends(session),u=Depends(current)):return [pack(x)for x in s.scalars(select(Audit).order_by(Audit.id.desc()).limit(50))]
 @app.post('/accessions')
@@ -91,9 +91,15 @@ def harvested(d:HarvestInput,s=Depends(session),u=Depends(writer)):
 @app.put('/harvests/{id}')
 def edit_harvest(id:int,d:HarvestInput,s=Depends(session),u=Depends(writer)):
     x=harvest.save(s,d,u,id);s.commit();return x
+@app.get('/harvests/{id}/yield-check')
+def yield_check(id:int,s=Depends(session),u=Depends(current)):
+    return harvest.preview(s,id,u)
 @app.post('/harvests/{id}/store')
-def store(id:int,s=Depends(session),u=Depends(supervisor)):
-    x=harvest.store(s,id,u);s.commit();return x
+def store(id:int,d:StoreInput|None=None,s=Depends(session),u=Depends(supervisor)):
+    x=harvest.store(s,id,u,d);s.commit();return x
+@app.post('/harvests/{id}/exclude')
+def exclude(id:int,d:ExclusionInput,s=Depends(session),u=Depends(supervisor)):
+    x=harvest.exclude_sample(s,id,d,u);s.commit();return x
 @app.post('/distributions')
 def distribution(d:DistributionInput,s=Depends(session),u=Depends(writer)):
     x=sharing.request(s,d,u);s.commit();return x
